@@ -1,4 +1,154 @@
-# TypeScript library starter
+# ts-axios-demo
+## ts intro
+###1. 基础类型
+```
+let isDone: boolean = true
+isDone = 'string' // errors
+
+let index: number = 12
+
+let str: string = 'string'
+
+let arr: Array<number> = [2, 4]
+
+let arr1: number[] = [1, 3]
+
+元组
+let x: [string, number]
+x = ['str', 8]
+x = [8, 'str'] // Error
+
+枚举
+enum Color {Red, Blue, Green}
+let c: Color = Color.Red // 0
+let b = Color[1] // 'Blue'
+
+// 指定位置
+enum Color {Red, Blue=3, Green}
+<!-- 默认从0开始 -->
+console.log(Color.Red) // 0
+console.log(Color.Blue) // 3
+
+<!-- any类型 -->
+let a: any  = 'str'
+a = 10
+a = true
+```
+有兴趣的可以去[ts练习](https://www.tslang.cn/play/index.html)
+
+### 变量声明
+变量声明和 es6基本一样，这里只简单的讲一下
+
+```
+//javascript
+var a = 10 
+//其实可以分为两步
+var a
+a = 10
+//在js中 var声明的变量会进行变量提升。
+
+es6中使用 let const来声明变量
+// let  const 和var的区别主要在于 let和const 创造了块级作用域，且不会进行变量提升，所以在使用之前一定要先
+// 创建变量。  let和const的区别在于，let定义的变量可以修改。const定义的变量不可修改(指的是变量本身的地址 // 不可修改)
+// 例如
+const myConst = 'myconst'
+myConst = 'youconst' // error
+
+const myCon = [8,9]
+myCon.push(0) // right
+```
+
+### 接口
+**TypeScript的核心原则之一是对值所具有的结构进行类型检查。 它有时被称做“鸭式辨型法”或“结构性子类型化”。 在TypeScript里，接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约**
+```
+interface requestConfig {
+  url: string
+  method: string,
+}
+
+function processConfig(config: requestConfig): void {
+  console.log(config.data) // Property 'data' does not exist on type 'requestConfig'.
+}
+```
+类型检查器会对 config进行检查，上面我们看到 config接口定义并没有is这个属性，所以在编译阶段ts就会报错
+
+可选属性
+```
+interface requestConfig {
+  url: string
+  method: string
+  data?: string
+  params?: any
+  header?: any
+}
+
+function processConfig(config: requestConfig): void {
+  console.log(config.data)
+  console.log(config.datay) 
+  // Property 'datay' does not exist on type 'requestConfig'. Did you mean 'data'?
+}
+```
+可选属性的好处是对可能存在的属性进行预定义，
+好处之二就是可以捕获不存在的属性时的错误。上面写错了 datay  报错如上。
+
+只读属性
+```
+interface requestConfig {
+  readonly url: string
+  method: string
+  data?: string
+  params?: any
+  header?: any
+}
+
+function processConfig(config: requestConfig): void {
+  config.url = 'http://www.baidu.com'
+  // Cannot assign to 'url' because it is a constant or a read-only property.
+  config.method = 'get'
+}
+
+
+```
+上面我们对只读属性url进行赋值时，会报错
+readonly vs const
+最简单的判断该用 readonly还是 const的方法就是看要把它当成变量合适属性使用，变量就用const 属性用readonly
+
+额外的属性检查
+```
+interface requestConfig {
+  url: string
+  method: string
+  data?: string
+  params?: any
+  header?: any
+  [propName: string]: any
+}
+
+function processConfig(config: requestConfig): void {
+  config.url = 'http://www.baidu.com'
+  config.method = 'get'
+  config.urls =
+}
+```
+对象字面量会被特殊对待并且会经过额外的属性检查，
+
+
+## 类
+类的写法。es6上类的写法和ts类似，但多了一些功能
+先看一个最简单的class写法
+```
+class Axios {
+  url: string
+  constructor(msg: string) {
+  this.url = msg
+    console.log(msg)
+  }
+  get() {
+    return this.url
+  }
+}
+let axios = new Axios('www.baidu.com')
+```
 
 [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![Greenkeeper badge](https://badges.greenkeeper.io/alexjoverm/typescript-library-starter.svg)](https://greenkeeper.io/)
@@ -7,7 +157,7 @@
 [![Dev Dependencies](https://david-dm.org/alexjoverm/typescript-library-starter/dev-status.svg)](https://david-dm.org/alexjoverm/typescript-library-starter?type=dev)
 [![Donate](https://img.shields.io/badge/donate-paypal-blue.svg)](https://paypal.me/AJoverMorales)
 
-A starter project that makes creating a TypeScript library extremely easy.
+A starter project that makes  a TypeScript creatinglibrary extremely easy.
 
 ![](https://i.imgur.com/opUmHp0.png)
 
@@ -159,12 +309,5 @@ Made with :heart: by [@alexjoverm](https://twitter.com/alexjoverm) and all these
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars.githubusercontent.com/u/6052309?v=3" width="100px;"/><br /><sub><b>Ciro</b></sub>](https://www.linkedin.com/in/ciro-ivan-agulló-guarinos-42109376)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=k1r0s "Code") [🔧](#tool-k1r0s "Tools") | [<img src="https://avatars.githubusercontent.com/u/947523?v=3" width="100px;"/><br /><sub><b>Marius Schulz</b></sub>](https://blog.mariusschulz.com)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=mariusschulz "Documentation") | [<img src="https://avatars.githubusercontent.com/u/4152819?v=3" width="100px;"/><br /><sub><b>Alexander Odell</b></sub>](https://github.com/alextrastero)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=alextrastero "Documentation") | [<img src="https://avatars1.githubusercontent.com/u/8728882?v=3" width="100px;"/><br /><sub><b>Ryan Ham</b></sub>](https://github.com/superamadeus)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=superamadeus "Code") | [<img src="https://avatars1.githubusercontent.com/u/8458838?v=3" width="100px;"/><br /><sub><b>Chi</b></sub>](https://consiiii.me)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=ChinW "Code") [🔧](#tool-ChinW "Tools") [📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=ChinW "Documentation") | [<img src="https://avatars2.githubusercontent.com/u/2856501?v=3" width="100px;"/><br /><sub><b>Matt Mazzola</b></sub>](https://github.com/mattmazzola)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=mattmazzola "Code") [🔧](#tool-mattmazzola "Tools") | [<img src="https://avatars0.githubusercontent.com/u/2664047?v=3" width="100px;"/><br /><sub><b>Sergii Lischuk</b></sub>](http://leefrost.github.io)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=Leefrost "Code") |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| [<img src="https://avatars1.githubusercontent.com/u/618922?v=3" width="100px;"/><br /><sub><b>Steve Lee</b></sub>](http;//opendirective.com)<br />[🔧](#tool-SteveALee "Tools") | [<img src="https://avatars0.githubusercontent.com/u/5127501?v=3" width="100px;"/><br /><sub><b>Flavio Corpa</b></sub>](http://flaviocorpa.com)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=kutyel "Code") | [<img src="https://avatars2.githubusercontent.com/u/22561997?v=3" width="100px;"/><br /><sub><b>Dom</b></sub>](https://github.com/foreggs)<br />[🔧](#tool-foreggs "Tools") | [<img src="https://avatars1.githubusercontent.com/u/755?v=4" width="100px;"/><br /><sub><b>Alex Coles</b></sub>](http://alexbcoles.com)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=myabc "Documentation") | [<img src="https://avatars2.githubusercontent.com/u/1093738?v=4" width="100px;"/><br /><sub><b>David Khourshid</b></sub>](https://github.com/davidkpiano)<br />[🔧](#tool-davidkpiano "Tools") | [<img src="https://avatars0.githubusercontent.com/u/7225802?v=4" width="100px;"/><br /><sub><b>Aarón García Hervás</b></sub>](https://aarongarciah.com)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=aarongarciah "Documentation") | [<img src="https://avatars2.githubusercontent.com/u/13683986?v=4" width="100px;"/><br /><sub><b>Jonathan Hart</b></sub>](https://www.stuajnht.co.uk)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=stuajnht "Code") |
-| [<img src="https://avatars0.githubusercontent.com/u/13509204?v=4" width="100px;"/><br /><sub><b>Sanjiv Lobo</b></sub>](https://github.com/Xndr7)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=Xndr7 "Documentation") | [<img src="https://avatars3.githubusercontent.com/u/7473800?v=4" width="100px;"/><br /><sub><b>Stefan Aleksovski</b></sub>](https://github.com/sAleksovski)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=sAleksovski "Code") | [<img src="https://avatars2.githubusercontent.com/u/8853426?v=4" width="100px;"/><br /><sub><b>dev.peerapong</b></sub>](https://github.com/devpeerapong)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=devpeerapong "Code") | [<img src="https://avatars0.githubusercontent.com/u/22260722?v=4" width="100px;"/><br /><sub><b>Aaron Groome</b></sub>](http://twitter.com/Racing5372)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=Racing5372 "Documentation") | [<img src="https://avatars3.githubusercontent.com/u/180963?v=4" width="100px;"/><br /><sub><b>Aaron Reisman</b></sub>](https://github.com/lifeiscontent)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=lifeiscontent "Code") | [<img src="https://avatars1.githubusercontent.com/u/32557482?v=4" width="100px;"/><br /><sub><b>kid-sk</b></sub>](https://github.com/kid-sk)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=kid-sk "Documentation") | [<img src="https://avatars0.githubusercontent.com/u/1503089?v=4" width="100px;"/><br /><sub><b>Andrea Gottardi</b></sub>](http://about.me/andreagot)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=AndreaGot "Documentation") |
-| [<img src="https://avatars3.githubusercontent.com/u/1375860?v=4" width="100px;"/><br /><sub><b>Yogendra Sharma</b></sub>](http://TechiesEyes.com)<br />[📖](https://github.com/alexjoverm/typescript-library-starter/commits?author=Yogendra0Sharma "Documentation") | [<img src="https://avatars3.githubusercontent.com/u/7407177?v=4" width="100px;"/><br /><sub><b>Rayan Salhab</b></sub>](http://linkedin.com/in/rayan-salhab/)<br />[💻](https://github.com/alexjoverm/typescript-library-starter/commits?author=cyphercodes "Code") |
-<!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 # ts-demo
