@@ -4,7 +4,8 @@
 ```
 let isDone: boolean = true
 isDone = 'string' // errors
-
+// 注意使用构造函数Boolean 创造的对象不是布尔值
+isDone = new Boolean(1) // 返回的是一个boolean object
 let index: number = 12
 
 let str: string = 'string'
@@ -29,10 +30,76 @@ enum Color {Red, Blue=3, Green}
 console.log(Color.Red) // 0
 console.log(Color.Blue) // 3
 
-<!-- any类型 -->
+// 空值
+// 在ts中 可以用void便是没有任何返回值的函数
+function alertName(): void {
+  alert('9')
+}
+
+// Null 和Undefined
+// 在typescript中 可以使用使用null和undefined来定义原始数据类型
+let u: undefined = undefined
+let n: null = null
+
+// 与void的区别是undefined和null是所有类型的子类型，也就是说undefined/null 类型的变量可以赋值给number类型的变量
+let n: undefined = undefined
+let num: number = n
+
+```
+#### any类型
+在任意值上访问任何属性都是被允许的
+```
 let a: any  = 'str'
 a = 10
 a = true
+console.log(a.myName)
+console.log(a.myName.firstName)
+```
+#### 未声明类型的变量
+未指定类型的变量会被推断为any类型
+```
+let n
+n = 'seven'
+n = 7
+```
+### 类型推论
+```
+let my = 'seven'
+my = 7 // error
+// index.ts(2,1): error TS2322: Type 'number' is not assignable to type 'string'.
+```
+事实上他等价于
+```
+let my: string = 'seven';
+my = 7;
+```
+ts会在没有明确指定类型的时候推测出一个类型，这就是类型推论。
+### 联合类型
+联合类型表示取值可以为多种类型中的一种
+```
+let myFav: string | number
+myFav = 'seven'
+myFav = 7
+myFav = true // error
+```
+联合类型使用 | 分隔每个类型
+#### 访问联合类型的属性或方法
+当ts不确定一个联合类型的变量到底是哪个类型时候 我们只能访问此联合类型的所有类型里共有的属性或方法
+```
+function getLength(something: string | number): number {
+  return something.toString()
+  return something.length // error
+}
+// index.ts(2,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+//  Property 'length' does not exist on type 'number'.
+```
+联合类型的变量在被赋值的时候，会根据类型推论的规则推断出一个类型
+```
+let myFavoriteNumber: string | number;
+myFavoriteNumber = 'seven';
+console.log(myFavoriteNumber.length); // 5
+myFavoriteNumber = 7;
+console.log(myFavoriteNumber.length); // 编译时报错
 ```
 有兴趣的可以去[ts练习](https://www.tslang.cn/play/index.html)
 
@@ -60,12 +127,21 @@ myCon.push(0) // right
 
 ### 接口
 **TypeScript的核心原则之一是对值所具有的结构进行类型检查。 它有时被称做“鸭式辨型法”或“结构性子类型化”。 在TypeScript里，接口的作用就是为这些类型命名和为你的代码或第三方代码定义契约**
+接口除了可用于对累的一部分行为进行抽象以外，也常用语对 对象的形状进行描述
 ```
 interface requestConfig {
   url: string
   method: string,
 }
-
+let config: requestConfig = {
+  url: 'www.baidu.com',
+  method: 'name',
+  age: 18
+}
+// Object literal may only specify known properties, and 'age' does not exist in type 'requestConfig'.
+```
+一般接口首字母大写 和类一样  赋值的时候变量的形状必须和接口的形状一样
+```
 function processConfig(config: requestConfig): void {
   console.log(config.data) // Property 'data' does not exist on type 'requestConfig'.
 }
@@ -91,7 +167,42 @@ function processConfig(config: requestConfig): void {
 可选属性的好处是对可能存在的属性进行预定义，
 好处之二就是可以捕获不存在的属性时的错误。上面写错了 datay  报错如上。
 
-只读属性
+
+#### 任意属性
+有时候我们希望一个接口允许有任意的属性
+```
+interface Person {
+  name: string
+  age?: number
+  [propName: string]: any
+}
+
+let tom: Person = {
+  name: 'Tom',
+  gender: 'male'
+}
+```
+使用[propName: string]定义了任意属性取string的值
+需要注意的是一旦定义了任意属性，那么确定属性和可选属性的类型都必须是他的类型的子集
+```
+interface Person {
+  name: string;
+  age?: number;
+  [propName: string]: string;
+}
+
+let tom: Person = {
+  name: 'Tom',
+  age: 25,
+  gender: 'male'
+};
+// index.ts(3,5): error TS2411: Property 'age' of type 'number' is not assignable to string index type 'string'.
+```
+任意属性的值允许是 string，但是可选属性 age 的值却是 number，number 不是 string 的子属性，所以报错了。
+
+
+
+####只读属性
 ```
 interface requestConfig {
   readonly url: string
@@ -106,9 +217,8 @@ function processConfig(config: requestConfig): void {
   // Cannot assign to 'url' because it is a constant or a read-only property.
   config.method = 'get'
 }
-
-
 ```
+**注意只读约束存在于第一次给对象赋值的时候，而不是第一次给只读属性赋值的时候**
 上面我们对只读属性url进行赋值时，会报错
 readonly vs const
 最简单的判断该用 readonly还是 const的方法就是看要把它当成变量合适属性使用，变量就用const 属性用readonly
@@ -132,7 +242,79 @@ function processConfig(config: requestConfig): void {
 ```
 对象字面量会被特殊对待并且会经过额外的属性检查，
 
+##函数类型
+一个函数有输入和输出。要在ts中对其进行约束，需要把输入和输出都考虑到，其中函数声明的类型定义教简单
+```
+function sum(x: number. y: number): number {
+  return x + y
+}
+sum(1, 2)
+sum(1,2,4)
+// index.ts(4,1): error TS2346: Supplied parameters do not match any signature of call target
+```
+注意 输入多余的(或者少于要求的)参数，是不被允许的
 
+#### 可选参数
+```
+function buildName(firstName: string, lastName?: string) {
+    if (lastName) {
+      return firstName + ' ' + lastName;
+    } else {
+      return firstName;
+    }
+}
+let tomcat = buildName('Tom', 'Cat');
+let tom = buildName('Tom');
+```
+可选参数必须接在必需参数后面。换句话说，可选参数后面不允许再出现必需参数了：
+
+####参数默认值
+es6中允许给函数的参数添加默认值，ts会将添加了默认值的参数识别为可选参数
+```
+function buildName(firstName: string = 'Tom', lastName: string) {
+  return firstName + ' ' + lastName;
+}
+let tomcat = buildName('Tom', 'Cat');
+let cat = buildName(undefined, 'Cat');
+```
+此时就不受[可选参数必须接在参数后面的限制了]
+
+#### 剩余参数
+es6中可以使用...rest的方式获取函数中的剩余参数
+```
+function push(array: any[], ...items: any[]) {
+  items.forEach(function(item) {
+    array.push(item);
+  });
+}
+
+let a = [];
+push(a, 1, 2, 3);
+```
+注意rest参数只能是最后一个参数
+####重载
+```
+function reverse(x: number | string): number | string {
+  if (typeof x === 'number') {
+    return Number(x.toString().split('').reverse().join(''));
+  } else if (typeof x === 'string') {
+    return x.split('').reverse().join('');
+  }
+}
+```
+上面函数实现了 输入数字反转数字。输入字符串输出反转字符串
+这样有一个缺点，就是不能准确的表达，当输入为数字的时候，输出也应该为数字
+```
+function reverse(x: number): number;
+function reverse(x: string): string;
+function reverse(x: number | string): number | string {
+  if (typeof x === 'number') {
+    return Number(x.toString().split('').reverse().join(''));
+  } else if (typeof x === 'string') {
+    return x.split('').reverse().join('');
+  }
+}
+```
 ## 类
 类的写法。es6上类的写法和ts类似，但多了一些功能
 先看一个最简单的class写法
@@ -152,164 +334,6 @@ let axios = new Axios('www.baidu.com')
 继承  extends
 
 
-[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-[![Greenkeeper badge](https://badges.greenkeeper.io/alexjoverm/typescript-library-starter.svg)](https://greenkeeper.io/)
-[![Travis](https://img.shields.io/travis/alexjoverm/typescript-library-starter.svg)](https://travis-ci.org/alexjoverm/typescript-library-starter)
-[![Coveralls](https://img.shields.io/coveralls/alexjoverm/typescript-library-starter.svg)](https://coveralls.io/github/alexjoverm/typescript-library-starter)
-[![Dev Dependencies](https://david-dm.org/alexjoverm/typescript-library-starter/dev-status.svg)](https://david-dm.org/alexjoverm/typescript-library-starter?type=dev)
-[![Donate](https://img.shields.io/badge/donate-paypal-blue.svg)](https://paypal.me/AJoverMorales)
 
-A starter project that makes  a TypeScript creatinglibrary extremely easy.
-
-![](https://i.imgur.com/opUmHp0.png)
-
-### Usage
-
-```bash
-git clone https://github.com/alexjoverm/typescript-library-starter.git YOURFOLDERNAME
-cd YOURFOLDERNAME
-
-# Run npm install and write your library name when asked. That's all!
-npm install
-```
-
-**Start coding!** `package.json` and entry files are already set up for you, so don't worry about linking to your main file, typings, etc. Just keep those files with the same name.
-
-### Features
-
- - Zero-setup. After running `npm install` things will setup for you :wink:
- - **[RollupJS](https://rollupjs.org/)** for multiple optimized bundles following the [standard convention](http://2ality.com/2017/04/setting-up-multi-platform-packages.html) and [Tree-shaking](https://alexjoverm.github.io/2017/03/06/Tree-shaking-with-Webpack-2-TypeScript-and-Babel/)
- - Tests, coverage and interactive watch mode using **[Jest](http://facebook.github.io/jest/)**
- - **[Prettier](https://github.com/prettier/prettier)** and **[TSLint](https://palantir.github.io/tslint/)** for code formatting and consistency
- - **Docs automatic generation and deployment** to `gh-pages`, using **[TypeDoc](http://typedoc.org/)**
- - Automatic types `(*.d.ts)` file generation
- - **[Travis](https://travis-ci.org)** integration and **[Coveralls](https://coveralls.io/)** report
- - (Optional) **Automatic releases and changelog**, using [Semantic release](https://github.com/semantic-release/semantic-release), [Commitizen](https://github.com/commitizen/cz-cli), [Conventional changelog](https://github.com/conventional-changelog/conventional-changelog) and [Husky](https://github.com/typicode/husky) (for the git hooks)
-
-### Importing library
-
-You can import the generated bundle to use the whole library generated by this starter:
-
-```javascript
-import myLib from 'mylib'
-```
-
-Additionally, you can import the transpiled modules from `dist/lib` in case you have a modular library:
-
-```javascript
-import something from 'mylib/dist/lib/something'
-```
-
-### NPM scripts
-
- - `npm t`: Run test suite
- - `npm start`: Run `npm run build` in watch mode
- - `npm run test:watch`: Run test suite in [interactive watch mode](http://facebook.github.io/jest/docs/cli.html#watch)
- - `npm run test:prod`: Run linting and generate coverage
- - `npm run build`: Generate bundles and typings, create docs
- - `npm run lint`: Lints code
- - `npm run commit`: Commit using conventional commit style ([husky](https://github.com/typicode/husky) will tell you to use it if you haven't :wink:)
-
-### Excluding peerDependencies
-
-On library development, one might want to set some peer dependencies, and thus remove those from the final bundle. You can see in [Rollup docs](https://rollupjs.org/#peer-dependencies) how to do that.
-
-Good news: the setup is here for you, you must only include the dependency name in `external` property within `rollup.config.js`. For example, if you want to exclude `lodash`, just write there `external: ['lodash']`.
-
-### Automatic releases
-
-_**Prerequisites**: you need to create/login accounts and add your project to:_
- - [npm](https://www.npmjs.com/)
- - [Travis CI](https://travis-ci.org)
- - [Coveralls](https://coveralls.io)
-
-_**Prerequisite for Windows**: Semantic-release uses
-**[node-gyp](https://github.com/nodejs/node-gyp)** so you will need to
-install
-[Microsoft's windows-build-tools](https://github.com/felixrieseberg/windows-build-tools)
-using this command:_
-
-```bash
-npm install --global --production windows-build-tools
-```
-
-#### Setup steps
-
-Follow the console instructions to install semantic release and run it (answer NO to "Do you want a `.travis.yml` file with semantic-release setup?").
-
-_Note: make sure you've setup `repository.url` in your `package.json` file_
-
-```bash
-npm install -g semantic-release-cli
-semantic-release-cli setup
-# IMPORTANT!! Answer NO to "Do you want a `.travis.yml` file with semantic-release setup?" question. It is already prepared for you :P
-```
-
-From now on, you'll need to use `npm run commit`, which is a convenient way to create conventional commits.
-
-Automatic releases are possible thanks to [semantic release](https://github.com/semantic-release/semantic-release), which publishes your code automatically on [github](https://github.com/) and [npm](https://www.npmjs.com/), plus generates automatically a changelog. This setup is highly influenced by [Kent C. Dodds course on egghead.io](https://egghead.io/courses/how-to-write-an-open-source-javascript-library)
-
-### Git Hooks
-
-There is already set a `precommit` hook for formatting your code with Prettier :nail_care:
-
-By default, there are two disabled git hooks. They're set up when you run the `npm run semantic-release-prepare` script. They make sure:
- - You follow a [conventional commit message](https://github.com/conventional-changelog/conventional-changelog)
- - Your build is not going to fail in [Travis](https://travis-ci.org) (or your CI server), since it's runned locally before `git push`
-
-This makes more sense in combination with [automatic releases](#automatic-releases)
-
-### FAQ
-
-#### `Array.prototype.from`, `Promise`, `Map`... is undefined?
-
-TypeScript or Babel only provides down-emits on syntactical features (`class`, `let`, `async/await`...), but not on functional features (`Array.prototype.find`, `Set`, `Promise`...), . For that, you need Polyfills, such as [`core-js`](https://github.com/zloirock/core-js) or [`babel-polyfill`](https://babeljs.io/docs/usage/polyfill/) (which extends `core-js`).
-
-For a library, `core-js` plays very nicely, since you can import just the polyfills you need:
-
-```javascript
-import "core-js/fn/array/find"
-import "core-js/fn/string/includes"
-import "core-js/fn/promise"
-...
-```
-
-#### What is `npm install` doing on first run?
-
-It runs the script `tools/init` which sets up everything for you. In short, it:
- - Configures RollupJS for the build, which creates the bundles
- - Configures `package.json` (typings file, main file, etc)
- - Renames main src and test files
-
-#### What if I don't want git-hooks, automatic releases or semantic-release?
-
-Then you may want to:
- - Remove `commitmsg`, `postinstall` scripts from `package.json`. That will not use those git hooks to make sure you make a conventional commit
- - Remove `npm run semantic-release` from `.travis.yml`
-
-#### What if I don't want to use coveralls or report my coverage?
-
-Remove `npm run report-coverage` from `.travis.yml`
-
-## Resources
-
-- [Write a library using TypeScript library starter](https://dev.to/alexjoverm/write-a-library-using-typescript-library-starter) by [@alexjoverm](https://github.com/alexjoverm/)
-- [📺 Create a TypeScript Library using typescript-library-starter](https://egghead.io/lessons/typescript-create-a-typescript-library-using-typescript-library-starter) by [@alexjoverm](https://github.com/alexjoverm/)
-- [Introducing TypeScript Library Starter Lite](https://blog.tonysneed.com/2017/09/15/introducing-typescript-library-starter-lite/) by [@tonysneed](https://github.com/tonysneed)
-
-## Projects using `typescript-library-starter`
-
-Here are some projects that use `typescript-library-starter`:
-
-- [NOEL - A universal, human-centric, replayable event emitter](https://github.com/lifenautjoe/noel)
-- [droppable - A library to give file dropping super-powers to any HTML element.](https://github.com/lifenautjoe/droppable)
-- [redis-messaging-manager - Pubsub messaging library, using redis and rxjs](https://github.com/tomyitav/redis-messaging-manager)
-
-## Credits
-
-Made with :heart: by [@alexjoverm](https://twitter.com/alexjoverm) and all these wonderful contributors ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
 
 # ts-demo
