@@ -4,8 +4,8 @@ axios({
   url: '/base/post',
   method: 'post',
   data: {
-    a: 0
-  }
+    a: 0,
+  },
 })
 // axios({
 //   method: 'get',

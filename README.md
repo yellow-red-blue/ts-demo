@@ -19,6 +19,7 @@ let x: [string, number]
 x = ['str', 8]
 x = [8, 'str'] // Error
 
+
 枚举
 enum Color {Red, Blue, Green}
 let c: Color = Color.Red // 0
@@ -314,6 +315,44 @@ function reverse(x: number | string): number | string {
     return x.split('').reverse().join('');
   }
 }
+```
+### 类型断言
+####语法
+<类型>值
+或者
+值 as类型
+
+之前说过。当 TypeScript 不确定一个联合类型的变量到底是哪个类型的时候，我们只能访问此联合类型的所有类型里共有的属性或方法：
+```
+function getLength(something: string | number): number {
+    return something.length;
+}
+
+// index.ts(2,22): error TS2339: Property 'length' does not exist on type 'string | number'.
+//   Property 'length' does not exist on type 'number'.
+```
+此时可以使用类型断言，将something断言成string
+```
+function getLength(something: string | number): number {
+    if ((<string>something).length) {
+        return (<string>something).length;
+    } else {
+        return something.toString().length;
+    }
+}
+
+```
+类型断言不是类型转换，断言成一个联合类型中不存在的类型是不允许的：
+
+### 字符串字面量类型
+字符串字面量类型用来约束取值只能是某几个字符串中的一个
+```
+type Method = 'get' | 'GET' | 'post' | 'POST'
+function promessAxiso(url: string, method: Method) {
+  // do something
+}
+promessAxiso('url', 'get')
+promessAxiso('url', 'ge') // 报错。methid不能为‘ge’
 ```
 ## 类
 类的写法。es6上类的写法和ts类似，但多了一些功能
