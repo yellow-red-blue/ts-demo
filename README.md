@@ -370,9 +370,266 @@ class Axios {
 }
 let axios = new Axios('www.baidu.com')
 ```
-继承  extends
+###继承  
+使用extends关键字实现继承，子类中使用super关键字来调取父类的构造函数和方法
+es6的写法
+```
+class Animal {
+  construtor(name) {
+    this.name = name
+  }
+  sayHi() {
+    return `My name is ${this.name}`
+  }
+}
+class Cat extends Animal {
+    constructor(name) {
+        super(name); // 调用父类的 constructor(name)
+        console.log(this.name);
+    }
+    sayHi() {
+        return 'Meow, ' + super.sayHi(); // 调用父类的 sayHi()
+    }
+}
 
+let c = new Cat('Tom'); // Tom
+console.log(c.sayHi()); // Meow, My name is Tom
+```
+#### 存取器
+```
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+  get name() {
+    return 'Jack';
+  }
+  set name(value) {
+    console.log('setter: ' + value);
+  }
+}
 
+let a = new Animal('Kitty'); // setter: Kitty
+a.name = 'Tom'; // setter: Tom
+console.log(a.name); // Jack
+```
+#### ts中类的用法
+**public private 和 protected**
+TypeScript 可以使用三种访问修饰符（Access Modifiers），分别是 public、private 和 protected。
++ public 修饰的属性或方法是公有的，可以在任何地方被访问到，默认所有的属性和方法都是 public 的
++ private 修饰的属性或方法是私有的，不能在声明它的类的外部访问
++ protected 修饰的属性或方法是受保护的，它和 private 类似，区别是它在子类中也是允许被访问的
 
+我们希望有的属性是无法直接存取的，这时候就可以用 private 了
+```
+class Animal {
+  private name;
+  public constructor(name) {
+    this.name = name;
+  }
+}
 
+let a = new Animal('Jack');
+console.log(a.name); // Jack
+a.name = 'Tom';
+
+// index.ts(9,13): error TS2341: Property 'name' is private and only accessible within class 'Animal'.
+// index.ts(10,1): error TS2341: Property 'name' is private and only accessible within class 'Animal'.
+```
+使用private修饰的属性和方法，在子类中也是不允许访问的。
+```
+class Animal {
+    private name;
+    public constructor(name) {
+        this.name = name;
+    }
+}
+
+class Cat extends Animal {
+    constructor(name) {
+        super(name);
+        console.log(this.name);
+    }
+}
+
+// index.ts(11,17): error TS2341: Property 'name' is private and only accessible within class 'Animal'
+```
+####readonly 
+只读属性关键字，只允许出现在属性声明或索引签名中。
+```
+class Animal {
+  readonly name;
+  public constructor(name) {
+    this.name = name;
+  }
+}
+
+let a = new Animal('Jack');
+console.log(a.name); // Jack
+a.name = 'Tom';
+
+// index.ts(10,3): TS2540: Cannot assign to 'name' because it is a read-only property.
+```
+
+#### 抽象类
+抽象类是不允许被实例化的：
+```
+abstract class Animal {
+  public name;
+  public constructor(name) {
+    this.name = name;
+  }
+  public abstract sayHi();
+}
+
+let a = new Animal('Jack');
+
+// index.ts(9,11): error TS2511: Cannot create an instance of the abstract class 'Animal'.
+```
+抽象类中的抽象方法必须被子类实现：
+```
+abstract class Animal {
+  public name;
+  public constructor(name) {
+    this.name = name;
+  }
+  public abstract sayHi();
+}
+
+class Cat extends Animal {
+  public sayHi() {
+    console.log(`Meow, My name is ${this.name}`);
+  }
+}
+
+let cat = new Cat('Tom');
+```
+
+## 类与接口
+接口（Interfaces）可以用于对「对象的形状（Shape）」进行描述
+介绍接口的另一个用途，对类的一部分行为进行抽象。
+####类实现接口
+```
+interface Alarm {
+    alert();
+}
+
+class Door {
+}
+
+class SecurityDoor extends Door implements Alarm {
+    alert() {
+        console.log('SecurityDoor alert');
+    }
+}
+
+class Car implements Alarm {
+    alert() {
+        console.log('Car alert');
+    }
+}
+```
+一个类可以实现多个接口：
+```
+interface Alarm {
+    alert();
+}
+
+interface Light {
+    lightOn();
+    lightOff();
+}
+
+class Car implements Alarm, Light {
+    alert() {
+        console.log('Car alert');
+    }
+    lightOn() {
+        console.log('Car light on');
+    }
+    lightOff() {
+        console.log('Car light off');
+    }
+}
+```
+
+### 接口继承接口
+```
+interface Alarm {
+    alert();
+}
+
+interface LightableAlarm extends Alarm {
+    lightOn();
+    lightOff();
+}
+```
+### 接口继承类
+```
+class Point {
+    x: number;
+    y: number;
+}
+
+interface Point3d extends Point {
+    z: number;
+}
+
+let point3d: Point3d = {x: 1, y: 2, z: 3};
+```
+
+## 泛型
+泛型（Generics）是指在定义函数、接口或类的时候，不预先指定具体的类型，而在使用的时候再指定类型的一种特性。
+```
+function createArray(length: number, value: any): Array<any> {
+  let result = [];
+  for (let i = 0; i < length; i++) {
+    result[i] = value;
+  }
+  return result;
+}
+
+createArray(3, 'x'); // ['x', 'x', 'x']
+```
+Array<any> 允许数组的每一项都为任意类型。但是我们预期的是，数组中每一项都应该是输入的 value 的类型
+
+```
+function createArray<T>(length: number, value: T): Array<T> {
+  let result: T[] = [];
+  for (let i = 0; i < length; i++) {
+    result[i] = value;
+  }
+  return result;
+}
+
+createArray<string>(3, 'x'); // ['x', 'x', 'x']
+```
+上例中，我们在函数名后添加了 <T>，其中 T 用来指代任意输入的类型，在后面的输入 value: T 和输出 Array<T> 中即可使用了。
+
+#### 泛型约束
+在函数内部使用泛型变量的时候，由于事先不知道它是哪种类型，所以不能随意的操作它的属性或方法：
+```
+function loggingIdentity<T>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+
+// index.ts(2,19): error TS2339: Property 'length' does not exist on type 'T'.
+```
+泛型T不一定包含属性length 所以编译的时候报错
+```
+interface Lengthwise {
+    length: number;
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length);
+    return arg;
+}
+```
+我们使用了 extends 约束了泛型 T 必须符合接口 Lengthwise 的形状，也就是必须包含 length 属性。
 # ts-demo
+
+## 练习入口
+[ts官网]('https://www.tslang.cn/index.html')
+[demo gitHub]('https://github.com/yellow-red-blue/ts-demo')
