@@ -1,11 +1,11 @@
 import axios from '../../src/index'
 // import qs from 'qs'
 axios({
-  url: '/base/post',
-  method: 'post',
-  data: {
-    a: 0,
-  },
+	url: '/base/post',
+	method: 'post',
+	data: {
+		a: 0
+	}
 })
 // axios({
 //   method: 'get',

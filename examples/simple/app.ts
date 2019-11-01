@@ -26,30 +26,36 @@ import axios from '../../src/index'
 //   }
 // })
 axios({
-  method: 'get',
-  url: '/simple/get?u=9#location',
-  params: {
-    a: { value: 90 },
-    b: ['i', 'b'],
-    c: 8,
-    d: new Date()
-  },
-  data: {
-    e: 0,
-    u: 'i'
-  }
+	method: 'get',
+	url: '/simple/get?u=9#location',
+	params: {
+		a: { value: 90 },
+		b: [ 'i', 'b' ],
+		c: 8,
+		d: new Date()
+	},
+	data: {
+		e: 0,
+		u: 'i'
+	}
+}).then((res) => {
+	console.log(888)
+	console.log(res)
 })
 axios({
-  method: 'post',
-  url: '/simple/get/data?u=9#location',
-  params: {
-    a: { value: 90 },
-    b: ['i', 'b'],
-    c: 8,
-    d: new Date()
-  },
-  data: {
-    e: 0,
-    u: 'i'
-  }
+	method: 'post',
+	url: '/simple/get/data?u=9#location',
+	params: {
+		a: { value: 90 },
+		b: [ 'i', 'b' ],
+		c: 8,
+		d: new Date()
+	},
+	data: {
+		e: 0,
+		u: 'i'
+	}
+}).then((res) => {
+	console.log(999)
+	console.log(res)
 })
