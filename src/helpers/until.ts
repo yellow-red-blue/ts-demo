@@ -13,3 +13,7 @@ export const isDate = (date: any): date is Date => {
 export const isNullOrUndefined = (param: any): param is null | undefined => {
 	return param === null || param === undefined
 }
+
+export const testFunction = (str: string): boolean => {
+	return false
+}
